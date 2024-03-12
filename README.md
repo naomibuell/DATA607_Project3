@@ -19,31 +19,50 @@ This project utilizes several R packages, including:
 
 Ensure that these packages are installed and loaded before running the code.
 
+## Data Source
+
+
+## Data Normalization
+
+
 ## Data Import
 
 The job data is imported from a CSV file hosted on GitHub. The `read_csv` function from the `readr` package is used for data import, and the `clean_names` function from the `janitor` package is applied to automatically clean column names.
 
-## Cleaning, Tidying, and Standardizing Variables of Interest
+## Cleaning and Tidying Variables of Interest
 
-### Title Extraction
+### Job Title
 
-- The `title` column is processed to extract additional details into a new column called `analyst_detail`.
-- Qualifiers such as "Remote," "Hybrid," and "Onsite" are identified and stored in the `analyst_detail_onsite_remote` column.
-
-### Standardization
-
+- The `title` column is tidied to remove additional words unrelated to job title in column cells.
 - Job titles are standardized by removing extraneous information such as "analyst," remote/onsite qualifiers, and special characters.
+- Job title qualifiers such as "Remote," "Hybrid," and "Onsite" are identified and verified against the existing `onsite_remote` column.
 - The cleaned job titles are stored in the `title_clean` column.
 
-## Location Data
+### Company
+- x
 
-### Extraction
+### Description
+- x
 
-- Location details are extracted from the `location` column into separate columns for city (`location_1`) and state (`location_2`).
+### Onsite, Hybrid, or Remote status
+- x
 
-### Verification
+### Salary
+- x
 
-- The uniqueness and accuracy of location data are verified by examining the levels of `location_1` and `location_2`.
+### Criteria
+- x
+
+### Location
+
+- Location details are extracted from the `location` column into separate columns for city and state (not all locations specify both city and state).
+- States are standardized using state abbreviations from built-in R dataset
+
+### Company
+- x
+
+## Analysis
+
 
 ## Conclusion
 
