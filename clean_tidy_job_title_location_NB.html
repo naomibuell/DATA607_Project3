@@ -530,7 +530,8 @@ jobs_loc &lt;- jobs_titles |&gt;
     city = if_else(is.na(state.abb) | location_2 != &quot;United States&quot;, location_1, NA)
   )</code></pre>
 <pre><code>## Joining with `by = join_by(location_1)`</code></pre>
-<p>Here are all the cities and states in which jobs were posted:</p>
+<p>Here are a few of the cities and states in which jobs were
+posted:</p>
 <pre class="r"><code>jobs_loc |&gt; select(city, state) |&gt; unique()</code></pre>
 <pre><code>## # A tibble: 112 × 2
 ##    city                       state
@@ -546,6 +547,40 @@ jobs_loc &lt;- jobs_titles |&gt;
 ##  9 Franklin                   TN   
 ## 10 &lt;NA&gt;                       WI   
 ## # ℹ 102 more rows</code></pre>
+</div>
+<div id="company" class="section level2">
+<h2>Company</h2>
+<p>Browsing companies for opportunities for standardization. It appears
+that this column is OK as is.</p>
+<pre class="r"><code>companies &lt;- jobs_loc |&gt; select(company) |&gt; unique()
+
+head(companies)</code></pre>
+<pre><code>## # A tibble: 6 × 1
+##   company                       
+##   &lt;chr&gt;                         
+## 1 PayPal                        
+## 2 The Federal Savings Bank      
+## 3 London Approach               
+## 4 Motley Rice                   
+## 5 Chicago Teachers&#39; Pension Fund
+## 6 FreightPlus</code></pre>
+</div>
+<div id="onsiteremote" class="section level2">
+<h2>Onsite/Remote</h2>
+<p>Browsing <code>onsite_remote</code> column for opportunities for
+standardization. The values are OK and converted to a factor
+variable.</p>
+<pre class="r"><code>jobs_onsite &lt;- jobs_loc  |&gt;
+  mutate(onsite_remote = as.factor(onsite_remote))
+
+levels(jobs_onsite$onsite_remote)</code></pre>
+<pre><code>## [1] &quot;hybrid&quot; &quot;onsite&quot; &quot;remote&quot;</code></pre>
+</div>
+<div id="final-data-frame" class="section level2">
+<h2>Final Data Frame</h2>
+<p>Lastly, I’ll remove any intermediate variables from the df:</p>
+<pre class="r"><code>jobs_cleaned &lt;- jobs_onsite |&gt; 
+  select(-c(starts_with(&quot;location&quot;), starts_with(&quot;analyst&quot;), title, state.abb))</code></pre>
 </div>
 
 

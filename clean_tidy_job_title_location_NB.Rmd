@@ -135,6 +135,19 @@ Browsing companies for opportunities for standardization. It appears that this c
 
 ```{r}
 companies <- jobs_loc |> select(company) |> unique()
+
+head(companies)
+```
+
+## Onsite/Remote
+
+Browsing `onsite_remote` column for opportunities for standardization. The values are OK and converted to a factor variable.
+
+```{r}
+jobs_onsite <- jobs_loc  |>
+  mutate(onsite_remote = as.factor(onsite_remote))
+
+levels(jobs_onsite$onsite_remote)
 ```
 
 ## Final Data Frame
@@ -142,6 +155,6 @@ companies <- jobs_loc |> select(company) |> unique()
 Lastly, I'll remove any intermediate variables from the df:
 
 ```{r}
-jobs_cleaned <- jobs_loc |> 
+jobs_cleaned <- jobs_onsite |> 
   select(-c(starts_with("location"), starts_with("analyst"), title, state.abb))
 ```
