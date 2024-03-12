@@ -129,6 +129,16 @@ Here are a few of the cities and states in which jobs were posted:
 jobs_loc |> select(city, state) |> unique()
 ```
 
+## Company
+
+Browsing companies for opportunities for standardization. It appears that this column is OK as is.
+
+```{r}
+companies <- jobs_loc |> select(company) |> unique()
+```
+
+## Final Data Frame
+
 Lastly, I'll remove any intermediate variables from the df:
 
 ```{r}
