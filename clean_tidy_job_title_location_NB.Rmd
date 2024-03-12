@@ -12,7 +12,6 @@ output: html_document
 # load packages
 library(dplyr)
 library(tidyverse)
-library(readr)
 library(janitor)
 ```
 
@@ -55,9 +54,7 @@ jobs_titles <- jobs_raw |>
       str_remove("Data analyst") |>
       str_remove(" - ") |>
       str_trim(),
-    analyst_detail = ifelse(analyst_detail == title, NA, analyst_detail) |> # remove if no change
-      as.factor(),
-    # pull details into new column for onsite_remote
+    # pull details into new column for onsite_remote for QC
     analyst_detail_onsite_remote = str_detect(analyst_detail, "Remote") |
       str_detect(analyst_detail, "remote") |
       str_detect(analyst_detail, "Hybrid") |
@@ -110,7 +107,31 @@ I do the same with seniority level, as we have this information in a column else
 
 ## Location
 
+Next I work with location, which contains data with varying levels of granularity (e.g., some at state level, some at city level). I make columns consistent by separating data into state and location columns.
+
 ```{r location}
-levels(jobs_title_loc$location_1)
-levels(jobs_title_loc$location_2)
+# get state names and abbreviations from built-in dataset
+states <- data.frame(state.abb, state.name) |>
+  rename(location_1 = state.name)
+
+jobs_loc <- jobs_titles |>
+  left_join(states) |> # join to get state abbrevs
+  mutate(
+    state = if_else(location_2 == "United States", state.abb, location_2),
+    # gen state (abbreviation) variable
+    city = if_else(is.na(state.abb) | location_2 != "United States", location_1, NA)
+  )
+```
+
+Here are a few of the cities and states in which jobs were posted:
+
+```{r summ-loc}
+jobs_loc |> select(city, state) |> unique()
+```
+
+Lastly, I'll remove any intermediate variables from the df:
+
+```{r}
+jobs_cleaned <- jobs_loc |> 
+  select(-c(starts_with("location"), starts_with("analyst"), title, state.abb))
 ```
