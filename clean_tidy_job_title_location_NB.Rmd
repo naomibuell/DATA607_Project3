@@ -1,0 +1,99 @@
+---
+title: "Project 3 - Naomi to start cleaning job title, location"
+author: "Naomi Buell"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+# load packages
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(janitor)
+```
+
+Import data from GitHub (currently using placeholder for database data).
+
+```{r import}
+csv_link <-
+  "https://raw.githubusercontent.com/naomibuell/DATA607_Project3/main/linkedin-jobs-usa.csv"
+
+jobs_raw <- read_csv(csv_link) |>
+  janitor::clean_names() |> # auto-cleaning column names using janitor package
+  mutate(
+    title = as.factor(title),
+    location_1 = as.factor(str_extract(location, "[^,]+")),
+    # get location before the comma, typically city
+    location_2 = as.factor(str_extract(location, "(?<=,\\s).+")) # use REGEX to get location after the comma, typically state
+  ) |> 
+  select(-c(posted_date, link))
+
+head(jobs_raw)
+```
+
+## Title
+
+Levels of title from raw df below. All are data analysts. Some job titles have other information included in the field (e.g., remote/hybrid information).
+
+```{r title-factors}
+levels(jobs_raw$title)
+```
+
+To be tidy, every cell can only have 1 piece of information. To this end, pull out remote/hybrid details from "title" and verify that this info matches with the existing "onsite_remote" column.
+
+```{r title}
+
+jobs_titles <- jobs_raw |>
+  # pull extra detail from "tite" to variable "analyst_detail"
+  mutate(
+    analyst_detail = title |>
+      str_remove("Data Analyst") |>
+      str_remove("Data analyst") |>
+      str_remove(" - ") |>
+      str_trim(),
+    analyst_detail = ifelse(analyst_detail == title, NA, analyst_detail) |> # remove if no change
+      as.factor(),
+    # pull details into new column for onsite_remote
+    analyst_detail_onsite_remote = analyst_detail |> 
+      str_detect(analyst_detail, "Remote") |
+      str_detect(analyst_detail, "remote") |
+      str_detect(analyst_detail, "Hybrid") |
+      str_detect(analyst_detail, "REMOTE") |
+      str_detect(analyst_detail, "WFH"),
+    # pull details into new column for senority_level
+    analyst_detail_seniority = analyst_detail |> 
+      str_detect("Recent Graduate") |
+      str_detect("Junior") |
+      str_detect("Senior") |,
+    
+    # Remove these details from our list of details
+    analyst_detail = analyst_detail |>
+      str_remove("Remote") |>
+      str_remove("remote") |>
+      str_remove("Hybrid") |>
+      str_remove("REMOTE") |> 
+      str_remove("WFH") |> 
+      str_remove("Recent Graduate") |> 
+      as.factor()
+  )
+
+levels(jobs_titles$analyst_detail)
+
+```
+
+I do the same with seniority level, as we have this information in a column elsewhere.
+
+```{r}
+
+```
+
+## Location
+
+```{r location}
+levels(jobs_title_loc$location_1)
+levels(jobs_title_loc$location_2)
+```
