@@ -58,31 +58,48 @@ jobs_titles <- jobs_raw |>
     analyst_detail = ifelse(analyst_detail == title, NA, analyst_detail) |> # remove if no change
       as.factor(),
     # pull details into new column for onsite_remote
-    analyst_detail_onsite_remote = analyst_detail |> 
-      str_detect(analyst_detail, "Remote") |
+    analyst_detail_onsite_remote = str_detect(analyst_detail, "Remote") |
       str_detect(analyst_detail, "remote") |
       str_detect(analyst_detail, "Hybrid") |
       str_detect(analyst_detail, "REMOTE") |
-      str_detect(analyst_detail, "WFH"),
-    # pull details into new column for senority_level
-    analyst_detail_seniority = analyst_detail |> 
-      str_detect("Recent Graduate") |
-      str_detect("Junior") |
-      str_detect("Senior") |,
-    
-    # Remove these details from our list of details
-    analyst_detail = analyst_detail |>
-      str_remove("Remote") |>
+      str_detect(analyst_detail, "WFH") |
+      str_detect(analyst_detail, "Onsite"),
+    # Remove these details and more from our list of details using REGEX
+    title_clean = title |>
+      str_replace("analyst", "Analyst") |> # standardize capitalization
+      str_remove("Remote") |> # remove remote/onsite qualifiers
       str_remove("remote") |>
       str_remove("Hybrid") |>
-      str_remove("REMOTE") |> 
+      str_remove("REMOTE") |>
       str_remove("WFH") |> 
-      str_remove("Recent Graduate") |> 
+      str_remove("Onsite")|>
+      str_remove("Weekly.*Schedule") |> 
+      str_remove("\\(.*\\)") |> # remove parentheticals
+      str_remove("\\/.*\\/") |> # remove content within slashes
+      str_remove("//") |> # remove other symbols to standardize
+      str_remove("!") |>
+      str_remove("- $") |> 
+      str_replace("  "," ") |> 
+      str_trim() |> 
       as.factor()
   )
+```
 
-levels(jobs_titles$analyst_detail)
+Here are all the values in my cleaned titles column:
 
+```{r titles-clean}
+levels(jobs_titles$title_clean)
+```
+
+I browsed the data to verify that remote/onsite job title qualifiers matched with specifications in the `remote_onsite` column.
+
+```{r verify-onsite-remote}
+jobs_onsite_check <- jobs_titles |> 
+  filter(analyst_detail_onsite_remote) |> 
+  select(title, onsite_remote) |> 
+  unique()
+
+head(jobs_onsite_check, nrow(jobs_onsite_check))
 ```
 
 I do the same with seniority level, as we have this information in a column elsewhere.
