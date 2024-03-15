@@ -1,0 +1,209 @@
+---
+title: "Project03"
+author: "Kaylie Evans"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary:
+1- find what rows are missing salary ranges 
+2- find what fields have salary information
+3- split the salary column into 2 columns for range
+4- move salary information for the rows that contain the information in other rows
+5- reformat the hourly wages to salary numbers
+
+
+## Load Libraries:
+```{r library-load}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+```
+
+
+#To be adjusted:
+## Load .csv:
+```{r csv-load}
+#reading in the data set to an object named after the inflation data set (infl)
+jobs_raw <- read.csv("https://raw.githubusercontent.com/naomibuell/DATA607_Project3/main/linkedin-jobs-usa.csv", sep = ',')
+
+#preserve the raw file
+jobs <- jobs_raw
+
+#preview data
+glimpse(jobs)
+```
+
+
+## 1
+### Find what rows are missing salary information
+```{r 1}
+#only missing salaries
+salary_finder_02 <- jobs |> 
+  filter(
+    salary == NaN
+  ) 
+```
+
+
+## 2
+### Find what fields have salary ranges 
+```{r 2}
+#title
+count(
+  salary_finder_02 |>
+  mutate(
+    title = str_extract_all(title, "salary") 
+    ) |>
+        filter(
+          title == "salary"
+        )
+)
+
+#company
+count(
+  salary_finder_02 |>
+  mutate(
+    company = str_extract_all(company, "salary") 
+  ) |>
+      filter(
+        company == "salary"
+      )
+)
+
+#description
+count(
+  salary_finder_02 |>
+  mutate(
+    description = str_extract_all(description, "salary") 
+  ) |>
+      filter(
+        description == "salary"
+      )
+)
+
+#location
+count(
+  salary_finder_02 |>
+  mutate(
+    location = str_extract_all(location, "salary") 
+  ) |>
+      filter(
+        location == "salary"
+      )
+)
+
+#criteria
+count(
+  salary_finder_02 |>
+  mutate(
+    criteria = str_extract_all(criteria, "salary") 
+  ) |>
+      filter(
+        criteria == "salary"
+      )
+)
+```
+
+## 3
+### split the salary column into 2 columns for range
+```{r 3}
+jobs <- jobs |>
+  mutate(
+    sal_high = str_extract(salary, "(?<=-).*"),
+    .after = salary
+  ) |>
+      mutate(
+        sal_low = str_extract(salary, ".*(?=-)"),
+        .before = sal_high
+      ) 
+```
+
+
+## 4
+### move salary information for the rows that contain the information in other rows
+```{r 4}
+jobs <- jobs |> 
+  mutate(
+    key_field = c(1:2845),
+    .before = title
+  ) 
+
+#rows where salary information is already available
+salary_exist <- jobs |> 
+  filter(
+    salary != NaN
+  ) 
+
+#rows where there is no salary information
+salary_finder_01 <- jobs |> 
+  filter(
+    salary == NaN
+  ) 
+
+#filling all available salaries from description
+salary_finder_03 <- salary_finder_01 |>
+  mutate(
+    description_02 = str_extract_all(description, "(Salary.*\\d+[,]\\d+)|(salary.*\\d+[,]\\d+)"),
+    .before = "description"
+  ) |>
+      filter(
+        description_02 != "character(0)"
+      ) |> 
+          mutate(
+            description_03 = as.character(str_extract_all(description_02, "\\d+[,]\\d+")),
+            .before = "description"
+          ) |>
+              mutate(
+                sal_low = str_extract(description_03, "\\d+[,]\\d+"),
+                sal_high = str_extract(description_03, "(?<=(\\s)).*"),
+                sal_high = str_extract(sal_high, "\\d+[,]\\d+"),
+                sal_high = ifelse(is.na(sal_high), sal_low, sal_high),
+                salary = paste(sal_low, " - ", sal_high),
+                description_02 = NULL,
+                description_03 = NULL
+              )
+
+#rows where there was no salary information available
+salary_finder_02 <- salary_finder_01 |>
+  mutate(
+    description_02 = str_extract_all(description, "(Salary.*\\d+[,]\\d+)|(salary.*\\d+[,]\\d+)"),
+    .before = "description"
+  ) |>
+      filter(
+        description_02 == "character(0)"
+      ) |>
+          mutate(
+            description_02 = NULL
+          )
+
+#joining all rows back together
+jobs_salary <- rbind(salary_exist, salary_finder_02, salary_finder_03)
+jobs_salary <- jobs_salary[order(jobs_salary$key_field), ]
+```
+
+
+## 5
+### reformat the hourly wages to salary numbers
+```{r 5}
+jobs_clean <- jobs |>
+  mutate(
+    sal_low = as.numeric(str_extract_all(sal_low, "//d+")),
+  ) 
+
+sal_monthly <- jobs_clean |>
+      filter(
+        sal_low > 100,
+        sal_low < 3000
+      ) |>
+          mutate(
+            sal_low = sal_low * 12
+          )
+
+#less than 3000 and greater than 100: x12
+#less than 300: x2080
+```
