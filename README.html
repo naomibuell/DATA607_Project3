@@ -9,11 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Naomi Buell" />
 
-<meta name="date" content="2024-03-15" />
 
-<title>Project 3 - Naomi to start cleaning job title, location</title>
+<title>README</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,241 +348,117 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Project 3 - Naomi to start cleaning job
-title, location</h1>
-<h4 class="author">Naomi Buell</h4>
-<h4 class="date">2024-03-15</h4>
 
 </div>
 
 
-<p>Import data from GitHub (currently using placeholder for database
-data).</p>
-<pre class="r"><code>csv_link &lt;-
-  &quot;https://raw.githubusercontent.com/naomibuell/DATA607_Project3/main/linkedin-jobs-usa.csv&quot;
-
-jobs_raw &lt;- read_csv(csv_link, na = c(&quot;&quot;, &quot;NA&quot;, &quot;NaN&quot;)) |&gt;
-  janitor::clean_names() |&gt; # auto-cleaning column names using janitor package
-  mutate(
-    title = as.factor(title),
-    location_1 = as.factor(str_extract(location, &quot;[^,]+&quot;)),
-    # get location before the comma, typically city
-    location_2 = as.factor(str_extract(location, &quot;(?&lt;=,\\s).+&quot;)) # use REGEX to get location after the comma, typically state
-  )</code></pre>
-<pre><code>## Rows: 2845 Columns: 9
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr  (8): title, company, description, onsite_remote, salary, location, crit...
-## date (1): posted_date
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>head(jobs_raw)</code></pre>
-<pre><code>## # A tibble: 6 × 11
-##   title   company description onsite_remote salary location criteria posted_date
-##   &lt;fct&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;         &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;    &lt;date&gt;     
-## 1 Data A… PayPal  At PayPal … onsite        &lt;NA&gt;   Buffalo… [{&#39;Seni… 2022-11-22 
-## 2 Data A… PayPal  At PayPal … onsite        &lt;NA&gt;   San Jos… [{&#39;Seni… 2022-11-22 
-## 3 Data A… PayPal  At PayPal … onsite        &lt;NA&gt;   Texas, … [{&#39;Seni… 2022-11-17 
-## 4 Data A… PayPal  At PayPal … onsite        &lt;NA&gt;   Illinoi… [{&#39;Seni… 2022-11-17 
-## 5 Entry-… The Fe… The Federa… onsite        &lt;NA&gt;   Chicago… [{&#39;Seni… 2022-11-17 
-## 6 Data A… PayPal  At PayPal … onsite        &lt;NA&gt;   Greater… [{&#39;Seni… 2022-11-17 
-## # ℹ 3 more variables: link &lt;chr&gt;, location_1 &lt;fct&gt;, location_2 &lt;fct&gt;</code></pre>
-<div id="title" class="section level2">
-<h2>Title</h2>
-<p>Levels of title from raw df below. All are data analysts. Some job
-titles have other information included in the field (e.g., remote/hybrid
-information).</p>
-<pre class="r"><code>levels(jobs_raw$title)</code></pre>
-<pre><code>##  [1] &quot;Analyst - Data Visualization&quot;                       
-##  [2] &quot;Analyst (Global Data and Analytics)&quot;                
-##  [3] &quot;Analyst, Data and Analytics&quot;                        
-##  [4] &quot;Associate Data Analyst&quot;                             
-##  [5] &quot;Business Data Analyst&quot;                              
-##  [6] &quot;Consultant/Data Analyst&quot;                            
-##  [7] &quot;Data analyst&quot;                                       
-##  [8] &quot;Data Analyst&quot;                                       
-##  [9] &quot;Data Analyst - (Remote - US)&quot;                       
-## [10] &quot;Data Analyst - Energy&quot;                              
-## [11] &quot;Data Analyst - Recent Graduate&quot;                     
-## [12] &quot;Data Analyst - Remote&quot;                              
-## [13] &quot;Data Analyst - remote!&quot;                             
-## [14] &quot;Data Analyst - Weekly Hybrid Remote/Onsite Schedule&quot;
-## [15] &quot;Data Analyst (Global Remote)&quot;                       
-## [16] &quot;Data Analyst (Hybrid)&quot;                              
-## [17] &quot;Data Analyst (Remote)&quot;                              
-## [18] &quot;Data Analyst (SQL, Teraform, Tableau) III - Remote&quot; 
-## [19] &quot;Data Analyst (SQL)&quot;                                 
-## [20] &quot;Data Analyst I&quot;                                     
-## [21] &quot;Data Analyst I (entry level)&quot;                       
-## [22] &quot;Data Analyst III - Remote&quot;                          
-## [23] &quot;Data Analyst, Money&quot;                                
-## [24] &quot;Data Analyst/ $100M Valuation/ Hybrid&quot;              
-## [25] &quot;Data Analyst/Collector&quot;                             
-## [26] &quot;Data Analytics Analyst&quot;                             
-## [27] &quot;Data Visualization Analyst&quot;                         
-## [28] &quot;Entry Level Data Analyst&quot;                           
-## [29] &quot;Entry-Level Data Analyst&quot;                           
-## [30] &quot;Group Data Analyst&quot;                                 
-## [31] &quot;Junior Data Analyst&quot;                                
-## [32] &quot;Junior Data Analyst-Entry Level&quot;                    
-## [33] &quot;Marketing Data Analyst&quot;                             
-## [34] &quot;REMOTE Data Analyst (SQL, Operations)&quot;              
-## [35] &quot;Senior Data Analyst&quot;                                
-## [36] &quot;SQL Data Analyst&quot;                                   
-## [37] &quot;WFH//Data Analyst&quot;</code></pre>
-<p>To be tidy, every cell can only have 1 piece of information. To this
-end, pull out remote/hybrid details from “title” and verify that this
-info matches with the existing “onsite_remote” column.</p>
-<pre class="r"><code>jobs_titles &lt;- jobs_raw |&gt;
-  # pull extra detail from &quot;tite&quot; to variable &quot;analyst_detail&quot;
-  mutate(
-    analyst_detail = title |&gt;
-      str_remove(&quot;Data Analyst&quot;) |&gt;
-      str_remove(&quot;Data analyst&quot;) |&gt;
-      str_remove(&quot; - &quot;) |&gt;
-      str_trim(),
-    # pull details into new column for onsite_remote for QC
-    analyst_detail_onsite_remote = str_detect(analyst_detail, &quot;Remote&quot;) |
-      str_detect(analyst_detail, &quot;remote&quot;) |
-      str_detect(analyst_detail, &quot;Hybrid&quot;) |
-      str_detect(analyst_detail, &quot;REMOTE&quot;) |
-      str_detect(analyst_detail, &quot;WFH&quot;) |
-      str_detect(analyst_detail, &quot;Onsite&quot;),
-    # Remove these details and more from our list of details using REGEX
-    title_clean = title |&gt;
-      str_replace(&quot;analyst&quot;, &quot;Analyst&quot;) |&gt; # standardize capitalization
-      str_remove(&quot;Remote&quot;) |&gt; # remove remote/onsite qualifiers
-      str_remove(&quot;remote&quot;) |&gt;
-      str_remove(&quot;Hybrid&quot;) |&gt;
-      str_remove(&quot;REMOTE&quot;) |&gt;
-      str_remove(&quot;WFH&quot;) |&gt; 
-      str_remove(&quot;Onsite&quot;)|&gt;
-      str_remove(&quot;Weekly.*Schedule&quot;) |&gt; 
-      str_remove(&quot;\\(.*\\)&quot;) |&gt; # remove parentheticals
-      str_remove(&quot;\\/.*\\/&quot;) |&gt; # remove content within slashes
-      str_remove(&quot;//&quot;) |&gt; # remove other symbols to standardize
-      str_remove(&quot;!&quot;) |&gt;
-      str_remove(&quot;- $&quot;) |&gt; 
-      str_replace(&quot;  &quot;,&quot; &quot;) |&gt; 
-      str_trim() |&gt; 
-      as.factor()
-  )</code></pre>
-<p>Here are all the values in my cleaned titles column:</p>
-<pre class="r"><code>levels(jobs_titles$title_clean)</code></pre>
-<pre><code>##  [1] &quot;Analyst&quot;                         &quot;Analyst - Data Visualization&quot;   
-##  [3] &quot;Analyst, Data and Analytics&quot;     &quot;Associate Data Analyst&quot;         
-##  [5] &quot;Business Data Analyst&quot;           &quot;Consultant/Data Analyst&quot;        
-##  [7] &quot;Data Analyst&quot;                    &quot;Data Analyst - Energy&quot;          
-##  [9] &quot;Data Analyst - Recent Graduate&quot;  &quot;Data Analyst I&quot;                 
-## [11] &quot;Data Analyst III&quot;                &quot;Data Analyst, Money&quot;            
-## [13] &quot;Data Analyst/Collector&quot;          &quot;Data Analytics Analyst&quot;         
-## [15] &quot;Data Visualization Analyst&quot;      &quot;Entry Level Data Analyst&quot;       
-## [17] &quot;Entry-Level Data Analyst&quot;        &quot;Group Data Analyst&quot;             
-## [19] &quot;Junior Data Analyst&quot;             &quot;Junior Data Analyst-Entry Level&quot;
-## [21] &quot;Marketing Data Analyst&quot;          &quot;Senior Data Analyst&quot;            
-## [23] &quot;SQL Data Analyst&quot;</code></pre>
-<p>I browsed the data to verify that remote/onsite job title qualifiers
-matched with specifications in the <code>remote_onsite</code>
-column.</p>
-<pre class="r"><code>jobs_onsite_check &lt;- jobs_titles |&gt; 
-  filter(analyst_detail_onsite_remote) |&gt; 
-  select(title, onsite_remote) |&gt; 
-  unique()
-
-head(jobs_onsite_check, nrow(jobs_onsite_check))</code></pre>
-<pre><code>## # A tibble: 12 × 2
-##    title                                               onsite_remote
-##    &lt;fct&gt;                                               &lt;chr&gt;        
-##  1 Data Analyst - (Remote - US)                        remote       
-##  2 Data Analyst - remote!                              remote       
-##  3 REMOTE Data Analyst (SQL, Operations)               remote       
-##  4 Data Analyst - Remote                               remote       
-##  5 Data Analyst (Remote)                               remote       
-##  6 Data Analyst (Global Remote)                        remote       
-##  7 WFH//Data Analyst                                   remote       
-##  8 Data Analyst III - Remote                           remote       
-##  9 Data Analyst (SQL, Teraform, Tableau) III - Remote  remote       
-## 10 Data Analyst/ $100M Valuation/ Hybrid               hybrid       
-## 11 Data Analyst - Weekly Hybrid Remote/Onsite Schedule hybrid       
-## 12 Data Analyst (Hybrid)                               hybrid</code></pre>
-<p>I do the same with seniority level, as we have this information in a
-column elsewhere.</p>
+<div id="project-3-which-are-the-most-valued-data-science-skills" class="section level1">
+<h1>Project 3: Which are the most valued data science skills?</h1>
+<p><strong>Authors</strong>: Naomi Buell, Nick Kunze, Kaylie Evans<br />
+<strong>Date</strong>: <code>r Sys.Date()</code></p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>This project aims to answer the question, “which are the most value
+data science skills?” The process involves selecting a data set,
+normalizing the data, cleaning and tidying data, and performaing an
+analysis.</p>
 </div>
-<div id="location" class="section level2">
-<h2>Location</h2>
-<p>Next I work with location, which contains data with varying levels of
-granularity (e.g., some at state level, some at city level). I make
-columns consistent by separating data into state and location
-columns.</p>
-<pre class="r"><code># get state names and abbreviations from built-in dataset
-states &lt;- data.frame(state.abb, state.name) |&gt;
-  rename(location_1 = state.name)
-
-jobs_loc &lt;- jobs_titles |&gt;
-  left_join(states) |&gt; # join to get state abbrevs
-  mutate(
-    state = if_else(location_2 == &quot;United States&quot;, state.abb, location_2),
-    # gen state (abbreviation) variable
-    city = if_else(is.na(state.abb) | location_2 != &quot;United States&quot;, location_1, NA)
-  )</code></pre>
-<pre><code>## Joining with `by = join_by(location_1)`</code></pre>
-<p>Here are a few of the cities and states in which jobs were
-posted:</p>
-<pre class="r"><code>jobs_loc |&gt; select(city, state) |&gt; unique()</code></pre>
-<pre><code>## # A tibble: 112 × 2
-##    city                       state
-##    &lt;chr&gt;                      &lt;chr&gt;
-##  1 Buffalo-Niagara Falls Area &lt;NA&gt; 
-##  2 San Jose                   CA   
-##  3 &lt;NA&gt;                       TX   
-##  4 &lt;NA&gt;                       IL   
-##  5 Chicago                    IL   
-##  6 Greater Scranton Area      &lt;NA&gt; 
-##  7 &lt;NA&gt;                       TN   
-##  8 &lt;NA&gt;                       IN   
-##  9 Franklin                   TN   
-## 10 &lt;NA&gt;                       WI   
-## # ℹ 102 more rows</code></pre>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<div id="required-packages" class="section level3">
+<h3>Required Packages</h3>
+<p>This project utilizes several R packages, including: - dplyr -
+tidyverse - readr - janitor</p>
+<p>Ensure that these packages are installed and loaded before running
+the code.</p>
 </div>
-<div id="company" class="section level2">
-<h2>Company</h2>
-<p>Browsing companies for opportunities for standardization. It appears
-that this column is OK as is.</p>
-<pre class="r"><code>companies &lt;- jobs_loc |&gt; select(company) |&gt; unique()
-
-head(companies)</code></pre>
-<pre><code>## # A tibble: 6 × 1
-##   company                       
-##   &lt;chr&gt;                         
-## 1 PayPal                        
-## 2 The Federal Savings Bank      
-## 3 London Approach               
-## 4 Motley Rice                   
-## 5 Chicago Teachers&#39; Pension Fund
-## 6 FreightPlus</code></pre>
 </div>
-<div id="onsiteremote" class="section level2">
-<h2>Onsite/Remote</h2>
-<p>Browsing <code>onsite_remote</code> column for opportunities for
-standardization. The values are OK and converted to a factor
-variable.</p>
-<pre class="r"><code>jobs_onsite &lt;- jobs_loc  |&gt;
-  mutate(onsite_remote = as.factor(onsite_remote))
-
-levels(jobs_onsite$onsite_remote)</code></pre>
-<pre><code>## [1] &quot;hybrid&quot; &quot;onsite&quot; &quot;remote&quot;</code></pre>
+<div id="data-source" class="section level2">
+<h2>Data Source</h2>
 </div>
-<div id="final-data-frame" class="section level2">
-<h2>Final Data Frame</h2>
-<p>Lastly, I’ll remove any intermediate variables from the df:</p>
-<pre class="r"><code>jobs_cleaned &lt;- jobs_onsite |&gt; 
-  select(-c(starts_with(&quot;location&quot;), starts_with(&quot;analyst&quot;), title, state.abb, posted_date, link))</code></pre>
+<div id="data-normalization" class="section level2">
+<h2>Data Normalization</h2>
 </div>
-<div id="potential-analyses" class="section level2">
-<h2>Potential Analyses</h2>
-<pre class="r"><code>jobs_analysis &lt;- jobs_cleaned |&gt; 
-  drop_na(salary)</code></pre>
+<div id="data-import" class="section level2">
+<h2>Data Import</h2>
+<p>The job data is imported from a CSV file hosted on GitHub. The
+<code>read_csv</code> function from the <code>readr</code> package is
+used for data import, and the <code>clean_names</code> function from the
+<code>janitor</code> package is applied to automatically clean column
+names.</p>
+</div>
+<div id="cleaning-and-tidying-variables-of-interest" class="section level2">
+<h2>Cleaning and Tidying Variables of Interest</h2>
+<div id="job-title" class="section level3">
+<h3>Job Title</h3>
+<ul>
+<li>The <code>title</code> column is tidied to remove additional words
+unrelated to job title in column cells.</li>
+<li>Job titles are standardized by removing extraneous information such
+as “analyst,” remote/onsite qualifiers, and special characters.</li>
+<li>Job title qualifiers such as “Remote,” “Hybrid,” and “Onsite” are
+identified and verified against the existing <code>onsite_remote</code>
+column.</li>
+<li>The cleaned job titles are stored in the <code>title_clean</code>
+column.</li>
+</ul>
+</div>
+<div id="company" class="section level3">
+<h3>Company</h3>
+<ul>
+<li>Verified no revisions needed.</li>
+</ul>
+</div>
+<div id="description" class="section level3">
+<h3>Description</h3>
+<ul>
+<li>x</li>
+</ul>
+</div>
+<div id="onsite-hybrid-or-remote-status" class="section level3">
+<h3>Onsite, Hybrid, or Remote status</h3>
+<ul>
+<li>Updated <code>onsite_remote</code> variable type to factor variable.
+Confirmed no other revisions needed.</li>
+</ul>
+</div>
+<div id="salary" class="section level3">
+<h3>Salary</h3>
+<ul>
+<li>x</li>
+</ul>
+</div>
+<div id="criteria" class="section level3">
+<h3>Criteria</h3>
+<ul>
+<li>x</li>
+</ul>
+</div>
+<div id="location" class="section level3">
+<h3>Location</h3>
+<ul>
+<li>Location details are extracted from the <code>location</code> column
+into separate columns for city and state (not all locations specify both
+city and state).</li>
+<li>States are standardized using state abbreviations from built-in R
+data set.</li>
+</ul>
+</div>
+<div id="company-1" class="section level3">
+<h3>Company</h3>
+<ul>
+<li>x</li>
+</ul>
+</div>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This README provides an overview of the project process. For detailed
+implementation and code snippets, refer to the R script.</p>
+</div>
 </div>
 
 
