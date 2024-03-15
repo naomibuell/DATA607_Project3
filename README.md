@@ -1,4 +1,4 @@
-# Project 3 - DATA 607: Which are the most valued data science skills?
+# Project 3: Which are the most valued data science skills?
 
 **Authors**: Naomi Buell, Nick Kunze, Kaylie Evans\
 **Date**: `r Sys.Date()`
