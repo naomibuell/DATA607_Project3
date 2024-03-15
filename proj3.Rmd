@@ -1,0 +1,130 @@
+---
+title: "Project3"
+author: "Nicholas Kunze"
+date: "2024-03-14"
+output:
+  html_document:
+    highlight: pygments
+    theme: cerulean
+    toc: true
+    toc_float: true
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+params:
+  dbuser: 
+    label: "Username"
+    value: "nicholas.kunze77"
+    input: text
+  dbpass: 
+    label: "Password"
+    value: "nicholas.kunze77"
+    input: password
+  dbname: 
+    label: "Database"
+    value: "nicholas.kunze77"
+    input: password
+  dbhost: 
+    label: "Host"
+    value: "cunydata607sql.mysql.database.azure.com"
+    input: password
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if("tidyverse" %in% rownames(installed.packages()) == FALSE) {install.packages("tidyverse")}
+if("RMySQL" %in% rownames(installed.packages()) == FALSE) {install.packages("RMySQL")}
+library(RMySQL)
+library(tidyverse)
+```
+
+## R Markdown
+
+
+```{r getdb}
+azuredb = dbConnect(MySQL(), user=params$dbuser, password=params$dbpass, dbname=params$dbname, host=params$dbhost)
+
+jobs <- dbGetQuery(azuredb, 
+  "SELECT 
+      j.id as id, t.title as title, c.cname as company, o.val as onsite_remote, 
+    	j.descr as `description`, j.salary as salary, j.location as location, j.criteria as criteria, 
+    	j.posted as posted, j.link as link
+   FROM 
+      jobs j, job_title t, company c, onsite_remote o
+   WHERE 
+      j.title = t.id AND j.cid = c.id AND j.orid = o.id;")
+head(jobs)
+```
+
+## Clean Description
+
+
+```{r clean-desc-gen}
+skills_list_str <- 'python,r,sql,machine learning,data mining,data visualization,big data,sql,nosql,hadoop,spark,statistics,a/b,cleaning,data warehouse,etl,data lake,communication,teamwork,sklearn,scikit,pandas,numpy,tensorflow,keras,pytorch,database,mysql,postgresql,oracle,mongo,cloud,aws,azure,google cloud,git,deep learning,dnn,neural network,powerbi,tableau,teradata,javascript,airflow,linux,perl,java,php,bachelor,master,phd,doctorate'
+skills_list <- strsplit(skills_list_str,split=",",fixed=TRUE)[[1]]
+jobs[, 'skills'] = ""
+```
+
+Iterate over job descriptions, check for skill 
+
+```{r clean-desc-skills}
+for (row in 1:nrow(jobs)) {
+  job <- jobs[row,]
+  desc <- tolower(job$description)
+  for(skill in skills_list) {
+    if(grepl(skill, desc, fixed = TRUE)) {
+      jobs[row,]$skills <- paste(jobs[row,]$skills,skill,",")
+    }
+  }
+}
+```
+
+```{r clean-skills}
+jobs.skills <- jobs %>%
+  pivot_longer(skills) %>%
+  mutate(value = strsplit(as.character(value), ",")) %>%
+  unnest(value) %>%
+  group_by(id, value) %>%
+  summarize(value = unique(value), .groups = "drop") %>%
+  as.data.frame()
+head(jobs.skills)
+```
+
+```{r clean-criteria}
+jobs <- jobs %>%
+    mutate(seniority = str_extract(criteria, "(?<='Seniority level': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(etype = str_extract(criteria, "(?<='Employment type': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(jfunction = str_extract(criteria, "(?<='Job function': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(industries = str_extract(criteria, "(?<='Industries': ')(.*?)(?='\\})"))
+```
+
+```{r industries}
+jobs.industries <- jobs %>%
+  pivot_longer(industries) %>%
+  mutate(value = strsplit(as.character(value), ",")) %>%
+  unnest(value) %>%
+  group_by(id, value) %>%
+  summarize(value = unique(value), .groups = "drop") %>%
+  as.data.frame()
+jobs.industries <- jobs.industries %>%
+  mutate(across('value', ~str_remove_all(., 'and ')))
+```
+
+```{r clean-location}
+#REMEMBER TO CHANGE THIS TO GITHUB RAW URI
+states <- read.csv("assignments/proj3/DATA607_Project3/states.csv")
+jobs[, 'state'] = ""
+for (row in 1:nrow(jobs)) {
+  job <- jobs[row,]
+  loc <- job$location
+  loc <- strsplit(loc, ",")[[1]]
+  if(length(loc) > 1 & sum(str_detect(states$Abbreviation, trimws(loc[2]))) > 0) {
+    jobs[row,]$state <- states[states$Abbreviation == trimws(loc[2]), "State"]
+  } else if(sum(str_detect(states$State, trimws(loc[1]))) > 0) {
+    jobs[row,]$state <- trimws(loc[1])
+  }
+}
+```
