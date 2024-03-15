@@ -21,15 +21,14 @@ Import data from GitHub (currently using placeholder for database data).
 csv_link <-
   "https://raw.githubusercontent.com/naomibuell/DATA607_Project3/main/linkedin-jobs-usa.csv"
 
-jobs_raw <- read_csv(csv_link) |>
+jobs_raw <- read_csv(csv_link, na = c("", "NA", "NaN")) |>
   janitor::clean_names() |> # auto-cleaning column names using janitor package
   mutate(
     title = as.factor(title),
     location_1 = as.factor(str_extract(location, "[^,]+")),
     # get location before the comma, typically city
     location_2 = as.factor(str_extract(location, "(?<=,\\s).+")) # use REGEX to get location after the comma, typically state
-  ) |> 
-  select(-c(posted_date, link))
+  )
 
 head(jobs_raw)
 ```
@@ -156,5 +155,12 @@ Lastly, I'll remove any intermediate variables from the df:
 
 ```{r}
 jobs_cleaned <- jobs_onsite |> 
-  select(-c(starts_with("location"), starts_with("analyst"), title, state.abb))
+  select(-c(starts_with("location"), starts_with("analyst"), title, state.abb, posted_date, link))
+```
+
+## Potential Analyses
+
+```{r}
+jobs_analysis <- jobs_cleaned |> 
+  drop_na(salary)
 ```
