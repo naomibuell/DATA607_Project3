@@ -1,0 +1,560 @@
+---
+title: "Project3"
+author: "Nicholas Kunze, Naomi Buell, Kaylie Evans"
+date: "2024-03-15"
+output:
+  html_document:
+    highlight: pygments
+    theme: cerulean
+    toc: true
+    toc_float: true
+  pdf_document: default
+editor_options: 
+  chunk_output_type: inline
+params:
+  dbuser: 
+    label: "Username"
+    value: "nicholas.kunze77"
+    input: text
+  dbpass: 
+    label: "Password"
+    value: "nicholas.kunze77"
+    input: password
+  dbname: 
+    label: "Database"
+    value: "nicholas.kunze77"
+    input: password
+  dbhost: 
+    label: "Host"
+    value: "cunydata607sql.mysql.database.azure.com"
+    input: password
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if("tidyverse" %in% rownames(installed.packages()) == FALSE) {install.packages("tidyverse")}
+if("RMySQL" %in% rownames(installed.packages()) == FALSE) {install.packages("RMySQL")}
+library(RMySQL)
+library(tidyverse)
+```
+
+## Load Database
+
+Get normalized database from MySQL server and browse.
+
+```{r getdb}
+azuredb = dbConnect(MySQL(), user=params$dbuser, password=params$dbpass, dbname=params$dbname, host=params$dbhost)
+
+jobs <- dbGetQuery(azuredb, 
+  "SELECT 
+      j.id as id, t.title as title, c.cname as company, o.val as onsite_remote, 
+    	j.descr as `description`, j.salary as salary, j.location as location, j.criteria as criteria, 
+    	j.posted as posted, j.link as link
+   FROM 
+      jobs j, job_title t, company c, onsite_remote o
+   WHERE 
+      j.title = t.id AND j.cid = c.id AND j.orid = o.id;")
+head(jobs)
+```
+
+## Tidy Description
+
+Prepare to find skills as listed in `skills_list_str` in the `description` variable.
+
+```{r clean-desc-gen}
+skills_list_str <-
+  'python,r,sql,machine learning,data mining,data visualization,big data,sql,nosql,hadoop,spark,statistics,a/b,cleaning,data warehouse,etl,data lake,communication,teamwork,sklearn,scikit,pandas,numpy,tensorflow,keras,pytorch,database,mysql,postgresql,oracle,mongo,cloud,aws,azure,google cloud,git,deep learning,dnn,neural network,powerbi,tableau,teradata,javascript,airflow,linux,perl,java,php,bachelor,master,phd,doctorate'
+skills_list <- strsplit(skills_list_str, split = ",", fixed = TRUE)[[1]]
+jobs[, 'skills'] = ""
+```
+
+Iterate over job descriptions and check for skill.
+
+```{r clean-desc-skills}
+for (row in 1:nrow(jobs)) {
+  job <- jobs[row, ]
+  desc <- tolower(job$description)
+  for (skill in skills_list) {
+    if (grepl(skill, desc, fixed = TRUE)) {
+      jobs[row, ]$skills <- paste(jobs[row, ]$skills, skill, ",")
+    }
+  }
+}
+```
+
+Create normalized table of skills mapped to unique job ID in `jobs` data frame.
+
+```{r clean-skills}
+jobs.skills <- jobs %>%
+  pivot_longer(skills) %>%
+  mutate(value = strsplit(as.character(value), ",")) %>%
+  unnest(value) %>%
+  group_by(id, value) %>%
+  summarize(value = unique(value), .groups = "drop") %>%
+  as.data.frame()
+head(jobs.skills)
+```
+
+## Tidy Criteria
+
+Split up `criteria` variable to create separate variables for seniority, employment type, job function, and industry.
+
+```{r clean-criteria}
+jobs <- jobs %>%
+    mutate(seniority = str_extract(criteria, "(?<='Seniority level': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(etype = str_extract(criteria, "(?<='Employment type': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(jfunction = str_extract(criteria, "(?<='Job function': ')(.*?)(?='\\})"))
+jobs <- jobs %>%
+    mutate(industries = str_extract(criteria, "(?<='Industries': ')(.*?)(?='\\})"))
+```
+
+Normalized table of industries mapped to unique job ID in `jobs` data frame.
+
+```{r industries}
+jobs.industries <- jobs %>%
+  pivot_longer(industries) %>%
+  mutate(value = strsplit(as.character(value), ",")) %>%
+  unnest(value) %>%
+  group_by(id, value) %>%
+  summarize(value = unique(value), .groups = "drop") %>%
+  as.data.frame()
+jobs.industries <- jobs.industries %>%
+  mutate(across('value', ~str_remove_all(., 'and ')))
+```
+
+## Tidy Title
+
+List of unique raw titles below. All are data analysts. Some job titles have other information included in the field (e.g., remote/hybrid information).
+
+```{r title-factors}
+unique(jobs$title)
+```
+
+To be tidy, every cell can only have one piece of information. To this end, pull out remote/hybrid details from "title". As a check, we verify that this info matches with the existing "onsite_remote" column.
+
+```{r title}
+jobs <- jobs |>
+  # pull extra detail from "tite" to variable "analyst_detail"
+  mutate(
+    analyst_detail = title |>
+      str_remove("Data Analyst") |>
+      str_remove("Data analyst") |>
+      str_remove(" - ") |>
+      str_trim(),
+    # pull details into new column for onsite_remote for QC
+    analyst_detail_onsite_remote = str_detect(analyst_detail, "Remote") |
+      str_detect(analyst_detail, "remote") |
+      str_detect(analyst_detail, "Hybrid") |
+      str_detect(analyst_detail, "REMOTE") |
+      str_detect(analyst_detail, "WFH") |
+      str_detect(analyst_detail, "Onsite"),
+    # Remove these details and more from our list of details using REGEX
+    title_clean = title |>
+      str_replace("analyst", "Analyst") |> # standardize capitalization
+      str_remove("Remote") |> # remove remote/onsite qualifiers
+      str_remove("remote") |>
+      str_remove("Hybrid") |>
+      str_remove("REMOTE") |>
+      str_remove("WFH") |> 
+      str_remove("Onsite")|>
+      str_remove("Weekly.*Schedule") |> 
+      str_remove("\\(.*\\)") |> # remove parentheticals
+      str_remove("\\/.*\\/") |> # remove content within slashes
+      str_remove("//") |> # remove other symbols to standardize
+      str_remove("!") |>
+      str_remove("- $") |> 
+      str_replace("  "," ") |> 
+      str_trim() |> 
+      as.factor()
+  )
+```
+
+Here are all the values in my cleaned titles column:
+
+```{r titles-clean}
+levels(jobs$title_clean)
+```
+
+As a check, I browsed the data to verify that remote/onsite job title qualifiers matched with specifications in the `remote_onsite` column. Everything looks consistent:
+
+```{r verify-onsite-remote}
+jobs_onsite_check <- jobs |> 
+  filter(analyst_detail_onsite_remote) |> 
+  select(title, onsite_remote) |> 
+  unique()
+
+head(jobs_onsite_check, nrow(jobs_onsite_check))
+```
+
+## Clean Location
+
+Next we work with location, which contains data with varying levels of granularity (e.g., some at state level, some at city level). We make columns consistent by separating data into state and location columns. We split `location` column into two separate columns–one for city and one for state below:
+
+```{r split-location}
+jobs <- jobs |>
+  mutate(
+    location_1 = str_extract(location, "[^,]+"),
+    # get location before the comma, typically city
+    location_2 = str_extract(location, "(?<=,\\s).+") # use REGEX to get location after the comma, typically state
+  )
+```
+
+We use the built in R data set to ensure the `state` variable is consistent; we use state abbreviations throughout. I also manually fix one city-state combination (Columbus, South Carolina Metropolitan Area to Columbus, SC).
+
+```{r revise-locations}
+# get state names and abbreviations from built-in dataset
+states <- data.frame(state.abb, state.name) |>
+  rename(location_1 = state.name)
+
+jobs <- jobs |>
+  left_join(states) |> # join to get state abbrevs
+  mutate(
+    # gen state (abbreviation) variable
+    state = if_else(location_2 == "United States", state.abb, location_2) |>
+      as.factor(),
+    
+    city = if_else(is.na(state.abb) |
+                     location_2 != "United States", location_1, NA) |>
+      as.factor()
+  ) |>
+  # fix South Carolina Metropolitan Area incorrect state
+  mutate(state = if_else(state == "South Carolina Metropolitan Area", "SC", state) |>
+           as.factor())
+```
+
+Here are the unique cities and states in which jobs were posted:
+
+```{r summ-cities}
+levels(jobs$city)
+```
+
+And here are the unique states:
+
+```{r summ-states}
+levels(jobs$state)
+```
+
+## Check Company
+
+Browsing companies for opportunities for standardization. It appears that this column is OK as is.
+
+```{r browse-companies}
+head(jobs |> select(company) |> unique())
+```
+
+## Clean Onsite/Remote
+
+Browsing `onsite_remote` column for opportunities for standardization. The values are OK and converted to a factor variable.
+
+```{r onsite-remote}
+jobs <- jobs  |>
+  mutate(onsite_remote = as.factor(onsite_remote))
+
+levels(jobs$onsite_remote)
+```
+
+## Clean and Tidy Salary
+
+1- find what rows are missing salary ranges 2- find what fields have salary information 3- split the salary column into 2 columns for range 4- move salary information for the rows that contain the information in other rows 5- reformat the hourly wages to salary numbers
+
+### Step 1: Find what rows are missing salary information
+
+```{r 1-salary}
+#only missing salaries
+salary_finder_02 <- jobs |> 
+  filter(
+    salary == NaN
+  ) 
+```
+
+### Step 2: Find what fields have salary ranges
+
+It is helpful to know which fields have salary information. Since the original columns have the information that were split wider to give new columns, we will only search the original columns.
+
+```{r 2-salary}
+#title
+count(
+  salary_finder_02 |>
+  mutate(
+    title = str_extract_all(title, "salary")
+  ) |>
+        filter(
+          title == "salary" 
+        )
+)
+count(
+salary_finder_02 |>
+  mutate(
+    title = str_extract_all(title, "$")
+  ) |>
+      filter(
+      title == "$" 
+      )
+)
+
+#company
+count(
+  salary_finder_02 |>
+  mutate(
+    company = str_extract_all(company, "salary") 
+  ) |>
+      filter(
+        company == "salary"
+      )
+)
+count(
+salary_finder_02 |>
+  mutate(
+    company = str_extract_all(company, "$")
+  ) |>
+      filter(
+      company == "$" 
+      )
+)
+
+#description
+count(
+  salary_finder_02 |>
+  mutate(
+    description = str_extract_all(description, "salary") 
+  ) |>
+      filter(
+        description == "salary"
+      )
+)
+count(
+salary_finder_02 |>
+  mutate(
+    description = str_extract_all(description, "$")
+  ) |>
+      filter(
+      description == "$" 
+      )
+)
+
+
+#location
+count(
+  salary_finder_02 |>
+  mutate(
+    location = str_extract_all(location, "salary") 
+  ) |>
+      filter(
+        location == "salary"
+      )
+)
+count(
+salary_finder_02 |>
+  mutate(
+    location = str_extract_all(location, "$")
+  ) |>
+      filter(
+      location == "$" 
+      )
+)
+
+#criteria
+count(
+  salary_finder_02 |>
+  mutate(
+    criteria = str_extract_all(criteria, "salary") 
+  ) |>
+      filter(
+        criteria == "salary"
+      )
+)
+count(
+salary_finder_02 |>
+  mutate(
+    criteria = str_extract_all(criteria, "$")
+  ) |>
+      filter(
+      criteria == "$" 
+      )
+)
+
+```
+
+The only salary information looks to be in the description with the words salary.
+
+### Step 3: split the salary column into 2 columns for range
+
+```{r 3-salary}
+jobs <- jobs |>
+  mutate(
+    sal_high = str_extract(salary, "(?<=-).*"),
+    .after = salary
+  ) |>
+      mutate(
+        sal_low = str_extract(salary, ".*(?=-)"),
+        .before = sal_high
+      ) 
+```
+
+### Step 4: move salary information for the rows that contain the information in other rows
+
+```{r 4-salary}
+jobs <- jobs |> 
+  mutate(
+    key_field = c(1:2845),
+    .before = title
+  ) 
+
+#rows where salary information is already available
+salary_exist <- jobs |> 
+  filter(
+    salary != NaN
+  ) 
+
+#rows where there is no salary information
+salary_finder_01 <- jobs |> 
+  filter(
+    salary == NaN
+  ) 
+
+#filling all available salaries from description
+salary_finder_03 <- salary_finder_01 |>
+  mutate(
+    description_02 = str_extract_all(description, "(Salary.*\\d+[,]\\d+)|(salary.*\\d+[,]\\d+)"),
+    .before = "description"
+  ) |>
+      filter(
+        description_02 != "character(0)"
+      ) |> 
+          mutate(
+            description_03 = as.character(str_extract_all(description_02, "\\d+[,]\\d+")),
+            .before = "description"
+          ) |>
+              mutate(
+                sal_low = str_extract(description_03, "\\d+[,]\\d+"),
+                sal_high = str_extract(description_03, "(?<=(\\s)).*"),
+                sal_high = str_extract(sal_high, "\\d+[,]\\d+"),
+                sal_high = ifelse(is.na(sal_high), sal_low, sal_high),
+                salary = paste(sal_low, " - ", sal_high),
+                description_02 = NULL,
+                description_03 = NULL
+              )
+
+#rows where there was no salary information available
+salary_finder_02 <- salary_finder_01 |>
+  mutate(
+    description_02 = str_extract_all(description, "(Salary.*\\d+[,]\\d+)|(salary.*\\d+[,]\\d+)"),
+    .before = "description"
+  ) |>
+      filter(
+        description_02 == "character(0)"
+      ) |>
+          mutate(
+            description_02 = NULL
+          )
+
+#joining all rows back together
+jobs_salary <- rbind(salary_exist, salary_finder_02, salary_finder_03)
+jobs_salary <- jobs_salary[order(jobs_salary$key_field), ]
+```
+
+### Step 5: reformat the hourly wages to salary numbers
+
+TODO include a distribution of salaries (0-30,000) to show why we are breaking it down by month
+
+```{r 5a-salary}
+#new data frame for exploring
+jobs_clean <- jobs_salary 
+
+#making sal_low and sal_high numeric
+jobs_clean$sal_low <- gsub("[$,]", "", jobs_clean$sal_low) |>
+  sapply(as.numeric)
+jobs_clean$sal_high <- gsub("[$,]", "", jobs_clean$sal_high) |>
+  sapply(as.numeric)
+
+#only rows with values for exploring
+no_na_low <- jobs_clean[!is.na(jobs_clean$sal_low), ]
+
+#plot histogram of all values
+ggplot(no_na_low, aes(sal_low)) + 
+  geom_histogram(bins = 50)
+
+#cut off the first group
+sal_to_adjust <- no_na_low |>
+  filter(
+    sal_low < 25000
+  )
+
+#plot the first group
+ggplot(sal_to_adjust, aes(sal_low)) + 
+  geom_histogram(bins = 8)
+```
+
+The distribution showing clear groups: below 1000 are hourly wages, above 5000 and below 7000 are monthly wages
+
+```{r 5b-salary}
+#sal_low less than 7000 and greater than 5000: x12
+#sal_low less than 1000: x2080
+
+#monthly conversion
+sal_monthly <- jobs_clean |>
+      filter(
+        sal_low > 5000,
+        sal_low < 7000
+      ) |>
+          mutate(
+            sal_low = sal_low * 12,
+            sal_high = sal_high * 12
+          )
+
+#hourly conversion
+sal_hourly <- jobs_clean |>
+      filter(
+        sal_low < 1000
+      ) |>
+          mutate(
+            sal_low = sal_low * 2080,
+            sal_high = sal_high * 2080
+          )
+
+#non converted df
+sal_correct <- jobs_clean |>
+      filter(
+        sal_low > 7000
+      ) 
+
+sal_na <- jobs_clean |>
+      filter(
+        is.na(sal_low)
+      ) 
+
+#stick together the fixed salaries data frame
+jobs <- rbind(sal_monthly, sal_hourly, sal_correct, sal_na)
+
+#peak at the data
+glimpse(jobs)
+```
+
+## Analysis
+
+### Most requested skills
+
+Here we determine the most requested skills (regardless of associated salary). Below is a list of the top 10 requested skills in our sample of job postings, where `count` indicates the number of job postings in our sample that mentioned this skill, and `perc` is the percentage of postings in our sample that mentioned this skill.
+
+```{r most-requested}
+top_10_skills <- jobs.skills |>
+  group_by(value) |>
+  summarize(count = n(),
+            perc = n() / nrow(jobs)) |>
+  arrange(desc(count)) |>
+  head(10)
+
+top_10_skills
+```
+
+The most requested skill to have is`r top_10_skills$value[1]`, appearing in `r round(top_10_skills$perc[1]*100)` percent of our job listings.
+
+```{r}
+ggplot(jobs.skills, aes(x = value)) +
+  geom_bar() +
+  coord_flip()
+```
+
+Above is a comprehensive account of skills we found and their respective number of mentions.
