@@ -15,7 +15,11 @@ This project aims to answer the question, "which are the most value data science
 
 ### Required Packages
 
-This project utilizes several R packages, including: - dplyr - tidyverse - readr - janitor
+This project utilizes several R packages, including:
+
+-   dplyr
+-   tidyverse
+-   readr
 
 Ensure that these packages are installed and loaded before running the code.
 
