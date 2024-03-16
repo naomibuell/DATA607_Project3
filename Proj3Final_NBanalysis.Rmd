@@ -551,10 +551,11 @@ top_10_skills
 
 The most requested skill to have is`r top_10_skills$value[1]`, appearing in `r round(top_10_skills$perc[1]*100)` percent of our job listings.
 
-```{r}
-ggplot(jobs.skills, aes(x = value)) +
+```{r skills-counts-plot}
+ggplot(jobs.skills, aes(x = fct_infreq(value))) +
   geom_bar() +
-  coord_flip()
+  coord_flip() +
+  labs(x = "skill")
 ```
 
 Above is a comprehensive account of skills we found and their respective number of mentions.
