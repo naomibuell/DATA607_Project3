@@ -38,6 +38,8 @@ The job data is imported from a database hosted on the class Azure database. The
 
 ## Data Dictionary
 
+All cleaning and tidying was completed in R. Below descripes steps taken to prepare the following variables for analysis.
+
 ### Job Title
 
 -   The `title` column is tidied to remove additional information unrelated to job title within the cell, such as "Remote," "Hybrid," and "Onsite". Redudant information is verified against the existing `onsite_remote` column, for example.
