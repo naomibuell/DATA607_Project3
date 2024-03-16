@@ -1,11 +1,15 @@
 # Project 3: Which are the most valued data science skills?
 
 **Authors**: Naomi Buell, Nick Kunze, Kaylie Evans\
-**Date**: `r Sys.Date()`
+**Date**: March 17, 2024
 
 ## Overview
 
-This project aims to answer the question, "which are the most value data science skills?" The process involves selecting a data set, normalizing the data, cleaning and tidying data, and performaing an analysis.
+This project aims to answer the question, "which are the most value data science skills?" The process involves selecting a data set, normalizing the data, cleaning and tidying data, and performing an analysis. This GitHub includes all code and results. The following provides additional documentation of our motivation, approach, and findings.
+
+## Motivation
+
+## Approach
 
 ## Setup
 
