@@ -11,15 +11,15 @@ This project aims to answer the question, "which are the most value data science
 
 As data science students, understanding which specific skills are highly valuable in our field can provide insights for those of us seeking to enter or advance within the field. Using data on the topic to come to a conclusion makes for a good exercise in data acquisition and analysis, and may further bolster these skills.
 
-### Approach
+### Data Source and Approach
 
 We use data on LinkedIn Data Analyst jobs listings from [Kaggle](https://www.kaggle.com/datasets/cedricaubin/linkedin-data-analyst-jobs-listings) (a CSV with 8,400+ rows of job titles, salaries, and descriptions) as our data source. First, we load it into our class Azure database using the Excel MySQL connector. From there, we normalize the table using SQL, and then clean, tidy, and analyze it in R.
 
 ## Setup
 
-### Normalization
+### Data Normalization
 
-The Entity-Relationship (ER) diagram below shows the normalized tables we intend to create, with descriptions of the data they hold, and how they are connected. Foreign keys for job title id (title), company id (cid), and remote/onsite id (orid) are indicated by red diamonds. 
+The Entity-Relationship (ER) diagram below shows the normalized tables we created in SQL before manipulating our data in R, including descriptions of the data they hold, and how they are connected. Foreign keys for job title id (title), company id (cid), and remote/onsite id (orid) are indicated by red diamonds. 
 
 ![Figure 1: Entity-Relationship (ER) diagram](ER.png)
 
@@ -27,28 +27,22 @@ The Entity-Relationship (ER) diagram below shows the normalized tables we intend
 
 This project utilizes several R packages, including:
 
--   dplyr
 -   tidyverse
--   readr
+-   RMySQL
 
 Ensure that these packages are installed and loaded before running the code.
 
-## Data Source
-
-## Data Normalization
-
 ## Data Import
 
-The job data is imported from a CSV file hosted on GitHub. The `read_csv` function from the `readr` package is used for data import, and the `clean_names` function from the `janitor` package is applied to automatically clean column names.
+The job data is imported from a database hosted on the class Azure database. The `dbConnect` and `dbGetQuery` functions from the `RMySQL` package are used for data import.
 
-## Cleaning and Tidying Variables of Interest
+## Data Dictionary
 
 ### Job Title
 
--   The `title` column is tidied to remove additional words unrelated to job title in column cells.
--   Job titles are standardized by removing extraneous information such as "analyst," remote/onsite qualifiers, and special characters.
--   Job title qualifiers such as "Remote," "Hybrid," and "Onsite" are identified and verified against the existing `onsite_remote` column.
--   The cleaned job titles are stored in the `title_clean` column.
+-   The `title` column is tidied to remove additional information unrelated to job title within the cell, such as "Remote," "Hybrid," and "Onsite". Redudant information is verified against the existing `onsite_remote` column, for example.
+-   Job title is standardized by using consistent capitalization and removing special characters.
+-   The final job titles are stored in the `title_clean` column.
 
 ### Company
 
@@ -74,10 +68,12 @@ The job data is imported from a CSV file hosted on GitHub. The `read_csv` functi
 
 -   Location details are extracted from the `location` column into separate columns for city and state (not all locations specify both city and state).
 -   States are standardized using state abbreviations from built-in R data set.
+-   The final location variables are stored in the `title_clean` column.
+
 
 ### Company
 
--   x
+-   `company` variable are reviewed for spelling errors. Confirmed no revisions needed.
 
 ## Analysis
 
