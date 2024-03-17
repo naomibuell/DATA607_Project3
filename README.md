@@ -96,6 +96,30 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 #### Most Requested Data Science Skill [Naomi to complete]
 
+We determine the most requested skills (regardless of associated salary). Below is a list of the top 10 most requested skills in our sample of job postings, where `count` indicates the number of job postings in our sample that mentioned this skill, and `perc` is the percentage of postings in our sample that mentioned this skill. SQL is the most frequently requested data science skill, appearing in 70% of our sample of job postings. Having SQL skills may be valuable as they put you in contention for the most jobs-—nearly twice as many as if you had good communication skills.
+
+**Table 1. Most Frequently Requested Skills**
+```
+## # A tibble: 10 × 3
+##    value                  count  perc
+##    <chr>                  <int> <dbl>
+##  1 " sql "                 2002 0.704
+##  2 " communication "       1112 0.391
+##  3 " python "              1089 0.383
+##  4 " tableau "             1030 0.362
+##  5 " statistics "           896 0.315
+##  6 " r "                    785 0.276
+##  7 " database "             619 0.218
+##  8 " data visualization "   454 0.160
+##  9 " etl "                  413 0.145
+## 10 " oracle "               358 0.126
+```
+
+The following figure displays the total number of requests for each skill, ranked from least requested to most requested. Interestingly, having a PHD is among the least frequently requested in our jobs postings. This may be due to our data set focusing on analyst positions in the field, whereas data scientists at the PHD-level may have more advanced positions. 
+
+**Figure 2. Skill Request Counts**
+![Figure 2: Skill Request Counts](most_requested_skills.png)
+
 #### Highest Valued Data Science Skill [Kaylie to complete]
 
 ## Conclusion
