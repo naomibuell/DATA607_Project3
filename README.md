@@ -46,7 +46,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Job Title
 
--   The `title` column is tidied to remove additional information unrelated to job title within the cell, such as "Remote," "Hybrid," and "Onsite". Redudant information is verified against the existing `onsite_remote` column, for example.
+-   Since in order to be tidy, each cell must contain only one piece of information, the `title` column is tidied to remove additional information unrelated to job title within the cell, such as "Remote," "Hybrid," and "Onsite". Redudant information is verified against the existing `onsite_remote` column, for example.
 -   Job title is standardized by using consistent capitalization and removing special characters.
 -   The final job titles are stored in the `title_clean` column.
 
