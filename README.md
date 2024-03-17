@@ -50,7 +50,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 -   Verified no revisions needed.
 
-### Description
+### Description [Nick to complete]
 
 -   x
 
@@ -58,11 +58,11 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 -   Updated `onsite_remote` variable type to factor variable. Confirmed no other revisions needed.
 
-### Salary
+### Salary [Kaylie to complete]
 
 -   x
 
-### Criteria
+### Criteria [Nick to complete]
 
 -   x
 
@@ -79,6 +79,20 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ## Analysis
 
+### Analysis Decisions
+
+- We define skill value in two different ways: 1) the frequency of requests for the skill in our sample of job postings and 2) the salary associated with the skill, according to job posting.
+- Addressing outliers: some salaries were low outliers due to being reported as weekly, bi-weekly, or monthly salaries instead of annual salaries. We removed lower outliers for analyses involving salary data.
+- Addressing missing salary data: we excluded observations without salary data from analyses involving salary.
+
+### Results
+
+#### Most Requested Data Science Skill [Naomi to complete]
+
+#### Highest Valued Data Science Skill [Kaylie to complete]
+
 ## Conclusion
+
+The most valuable skill in terms of [] is []. 
 
 This README provides an overview of the project process. For detailed implementation and code snippets, refer to the R script.
