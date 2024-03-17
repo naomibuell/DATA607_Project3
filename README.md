@@ -19,6 +19,8 @@ We use data on LinkedIn Data Analyst jobs listings from [Kaggle](https://www.kag
 
 ### Data Normalization
 
+[TODO] ADD INFO ON NORMALIZATION
+
 The Entity-Relationship (ER) diagram below shows the normalized tables we created in SQL before manipulating our data in R, including descriptions of the data they hold, and how they are connected. Foreign keys for job title id (title), company id (cid), and remote/onsite id (orid) are indicated by red diamonds. 
 
 ![Figure 1: Entity-Relationship (ER) diagram](ER.png)
@@ -54,7 +56,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Description [Nick to complete]
 
--   x
+-   Checked description text, ignoring case, for skills from existing keywords list.
 
 ### Onsite, Hybrid, or Remote status
 
