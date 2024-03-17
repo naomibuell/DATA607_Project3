@@ -29,6 +29,8 @@ This project utilizes several R packages, including:
 
 -   tidyverse
 -   RMySQL
+-   dplyr
+-   stringr
 
 Ensure that these packages are installed and loaded before running the code.
 
@@ -60,7 +62,10 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Salary [Kaylie to complete]
 
--   x
+-  Populated new salary range columns
+      - `sal_low` for low end of listed salary
+      - `sal high` for high end of listed salary
+- Populated missing salaries from other fields when applicable 
 
 ### Criteria [Nick to complete]
 
