@@ -25,6 +25,7 @@ The Entity-Relationship (ER) diagram below shows the normalized tables we create
 
 The database schema and data import was done through our ddl.sql file contents through MySQL Workbench.
 
+**Figure 1: Entity-Relationship (ER) diagram**
 ![Figure 1: Entity-Relationship (ER) diagram](ER.png)
 
 ### Required Packages
@@ -96,7 +97,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Results
 
-#### Most Requested Data Science Skill [Naomi to complete]
+#### Most Requested Data Science Skill
 
 We determine the most requested skills (regardless of associated salary). Below is a list of the top 10 most requested skills in our sample of job postings, where `count` indicates the number of job postings in our sample that mentioned this skill, and `perc` is the percentage of postings in our sample that mentioned this skill. SQL is the most frequently requested data science skill, appearing in 70% of our sample of job postings. Having SQL skills may be valuable as they put you in contention for the most jobs-—nearly twice as many as if you had good communication skills.
 
