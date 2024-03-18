@@ -59,7 +59,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Description
 
--   `description` text is parsed through, ignoring case, for skills from existing keywords list. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. Skills were extracted into new normalized table `jobs.skills`, with one column for skill name and one column mapping skill to unique job listing ID.
+-   `description` text is parsed through, ignoring case, for skills from existing data science skills keywords list sourced from various places on the web. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. Skills were extracted into new normalized table `jobs.skills`, with one column for skill name and one column mapping skill to unique job listing ID.
 
 ### Onsite, Hybrid, or Remote status
 
