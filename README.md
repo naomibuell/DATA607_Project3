@@ -59,11 +59,11 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Description
 
--   Checked description text, ignoring case, for skills from existing keywords list. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. 
+-   `description` text is parsed through, ignoring case, for skills from existing keywords list. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. Skills were extracted into new normalized table `jobs.skills`, with one column for skill name and one column mapping skill to unique job listing ID.
 
 ### Onsite, Hybrid, or Remote status
 
--   Updated `onsite_remote` variable type to factor variable. Confirmed no other revisions needed.
+-   Update `onsite_remote` variable type to factor variable. Confirmed no other revisions needed.
 
 ### Salary [Kaylie to complete]
 
@@ -74,7 +74,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 ### Criteria
 
--   Criteria field held a JSON object with a few specific one-to-one fields, such as employment type (full-time, part-time) that could be converted into new columns. There was however, one JSON field which needed to be converted to its own new table with a foreign key pointing to the jobs table: industries. As industries could have one or more values, it represented a one-to-many relationship. We created a jobs.industries dataframe which holds the values in a value column along with an id column which points to the ID field in the jobs dataframe.
+-   Criteria field held a JSON object with a few specific one-to-one fields, such as employment type (full-time, part-time) that could be converted into new columns as part of the tidying process. There was however, one JSON field which needed to be converted to its own new table with a foreign key pointing to the jobs table: industries. As industries could have one or more values, it represented a one-to-many relationship. We created a `jobs.industries` dataframe which holds the values in a value column along with an id column which points to the ID field in the `jobs` dataframe.
 
 ### Location
 
