@@ -59,9 +59,9 @@ jobs <- dbGetQuery(azuredb,
 head(jobs)
 ```
 
-## Tidy Description
+## Parse Description
 
-Prepare to find skills as listed in `skills_list_str` in the `description` variable.
+Prepare to find skills as listed in `skills_list_str` in the `description` variable. This list of data science skills were collected from a few places across the web.
 
 ```{r clean-desc-gen}
 skills_list_str <- 'python,r,sql,machine learning,data mining,data visualization,big data,sql,nosql,hadoop,spark,statistics,a/b,cleaning,data warehouse,etl,data lake,communication,teamwork,sklearn,scikit,pandas,numpy,tensorflow,keras,pytorch,database,mysql,postgresql,oracle,mongo,cloud,aws,azure,google cloud,git,deep learning,dnn,neural network,powerbi,tableau,teradata,javascript,airflow,linux,perl,java,php,bachelors,masters,phd,doctorate'
@@ -172,13 +172,13 @@ jobs <- jobs |>
   )
 ```
 
-Here are all the values in my cleaned titles column:
+Here are all the values in the `title_clean` column:
 
 ```{r titles-clean}
 levels(jobs$title_clean)
 ```
 
-As a check, I browsed the data to verify that remote/onsite job title qualifiers matched with specifications in the `remote_onsite` column. Everything looks consistent:
+As a check, we browsed the data to verify that remote/onsite job title qualifiers matched with specifications in the `remote_onsite` column. Everything looks consistent:
 
 ```{r verify-onsite-remote}
 jobs_onsite_check <- jobs |> 
@@ -690,6 +690,6 @@ ggplot(ny_top_skills, aes(x = top_skill, y = average_sal)) +
 
 ## Analysis:
 
-The top skills seen in the frequency graphs are SQL, communication, Python, Tableau, statistics, and R. Because of this, we know the most requested skills for the data science/ analyst career. 
+The top skills seen in the frequency graphs are SQL, communication, Python, Tableau, statistics, and R. Because of this, we know the most requested skills for the data science/analyst career. 
 
 From these top skills, we can see that Python, R and statistics are the skills requested with the highest average salary associated with their job postings. The lowest value for salary is for job postings that do not contain any of the top skills, as well as the lowest IQR range values.
