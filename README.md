@@ -65,7 +65,7 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 -   Update `onsite_remote` variable type to factor variable. Confirmed no other revisions needed.
 
-### Salary [Kaylie to complete]
+### Salary 
 
 -  Populated new salary range columns
       - `sal_low` for low end of listed salary
@@ -123,10 +123,13 @@ The following figure displays the total number of requests for each skill, ranke
 **Figure 2. Skill Request Counts**
 ![Figure 2: Skill Request Counts](most_requested_skills.png)
 
-#### Highest Valued Data Science Skill [Kaylie to complete]
+#### Highest Valued Data Science Skill 
+
+From these top skills, we can see that Python, R and statistics are the skills requested with the highest average salary associated with their job postings. The lowest value for salary is for job postings that do not contain any of the top skills, as well as the lowest IQR range values.
+
+The following figure displays the IQR breakdown of average salaries and top skills from the rankings above. 
 
 ## Conclusion
 
-The most valuable skill in terms of [] is []. 
-
+The most valuable skills in terms of median salary offered is Python and R.
 This README provides an overview of the project process. For detailed implementation and code snippets, refer to the R script.
