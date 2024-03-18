@@ -13,7 +13,11 @@ As data science students, understanding which specific skills are highly valuabl
 
 ### Data Source and Approach
 
-We use data on LinkedIn Data Analyst jobs listings from [Kaggle](https://www.kaggle.com/datasets/cedricaubin/linkedin-data-analyst-jobs-listings) (a CSV with 8,400+ rows of job titles, salaries, and descriptions) as our data source. First, we load it into our class Azure database using the Excel MySQL connector. From there, we normalize the table using SQL, and then clean, tidy, and analyze it in R.
+We use data on LinkedIn Data Analyst jobs listings from [Kaggle](https://www.kaggle.com/datasets/cedricaubin/linkedin-data-analyst-jobs-listings) (a CSV with 8,400+ rows of job titles, salaries, and descriptions) as our data source.
+
+This data set aims to answer the question using information for Data Analysts. The data comes from 2022 Linkedin job postings. It is common knowledge in the data science world that, since the industry is constantly evolving, the non-data-scientist view of the field is sometimes mislead. This is to say that there are many posts that are looking for what recruiters think of as a data analyst, but what we would consider data science. In the conclusion, we adress this again and explain our findings through this lens. 
+
+First, we load it into our class Azure database using the Excel MySQL connector. From there, we normalize the table using SQL, and then clean, tidy, and analyze it in R.
 
 ## Setup
 
@@ -125,11 +129,27 @@ The following figure displays the total number of requests for each skill, ranke
 
 #### Highest Valued Data Science Skill 
 
+**Figure 3. Top Skill Salary Counts**
+![Figure 3: Top Skill Salary Counts](TopSkills.png)
+
 From these top skills, we can see that Python, R and statistics are the skills requested with the highest average salary associated with their job postings. The lowest value for salary is for job postings that do not contain any of the top skills, as well as the lowest IQR range values.
 
 The following figure displays the IQR breakdown of average salaries and top skills from the rankings above. 
 
+**Figure 3. Top Skill Salary Counts**
+![Figure 3: Top Skill Salary Counts](TopSkills.png)
+
+The breakdown of the languages for salary are below. As far as Python, R, and SQL salaries go, the measured salaries for Python are bunched up at higher salaries than R and SQL. 
+
+**Figure 4. Programming Language Skill Salary Counts**
+![Figure 3: Programming Language Skill Salary Counts](PythonSQLR.png)
+
 ## Conclusion
 
-The most valuable skills in terms of median salary offered is Python and R.
+The most valuable skills in terms of median salary offered are Python and R. 
+
+All of the top skills are applicable to both Data Scientists and Data Analysts. Python and R are more commonly used for Data Scientists, as they are sometimes necessary for the work of a DS. Mastersindatascience.org notes the key differences between the two job titles: "A data analyst makes sense out of existing data through routine analysis and writing reports. A data scientist works on new ways to capture, store, manipulate and analyze that data." That manipulation is a huge difference, and shows that these job listings that ask for Python, R, and machine learning skills are likely misadvertising DS positions. 
+
+
+
 This README provides an overview of the project process. For detailed implementation and code snippets, refer to the R script.
