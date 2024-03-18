@@ -19,7 +19,7 @@ We use data on LinkedIn Data Analyst jobs listings from [Kaggle](https://www.kag
 
 ### Data Normalization
 
-[TODO] ADD INFO ON NORMALIZATION
+For normalization, job titles, companies, and onsite/remote felt like the most obvious fields to focus on for table decomposition. Focusing on these reduced a lot of data redundancy, with each being reduced to a few dozen titles, a few dozen companies, and only 3 types of onsite, remote, or hybrid. Each field got their own table with an auto-incrementing ID as their primary key, a VARCHAR containing their value, and the original jobs table having a foreign key referencing the value in these tables.
 
 The Entity-Relationship (ER) diagram below shows the normalized tables we created in SQL before manipulating our data in R, including descriptions of the data they hold, and how they are connected. Foreign keys for job title id (title), company id (cid), and remote/onsite id (orid) are indicated by red diamonds. 
 
@@ -54,9 +54,9 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 
 -   Verified no revisions needed.
 
-### Description [Nick to complete]
+### Description
 
--   Checked description text, ignoring case, for skills from existing keywords list.
+-   Checked description text, ignoring case, for skills from existing keywords list. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. 
 
 ### Onsite, Hybrid, or Remote status
 
@@ -69,9 +69,9 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
       - `sal high` for high end of listed salary
 - Populated missing salaries from other fields when applicable 
 
-### Criteria [Nick to complete]
+### Criteria
 
--   x
+-   Criteria field held a JSON object with a few specific one-to-one fields, such as employment type (full-time, part-time) that could be converted into new columns. There was however, one JSON field which needed to be converted to its own new table with a foreign key pointing to the jobs table: industries. As industries could have one or more values, it represented a one-to-many relationship. We created a jobs.industries dataframe which holds the values in a value column along with an id column which points to the ID field in the jobs dataframe.
 
 ### Location
 
