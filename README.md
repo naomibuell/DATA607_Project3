@@ -124,25 +124,33 @@ We determine the most requested skills (regardless of associated salary). Below 
 
 The following figure displays the total number of requests for each skill, ranked from least requested to most requested. Interestingly, having a PHD is among the least frequently requested in our jobs postings. This may be due to our data set focusing on analyst positions in the field, whereas data scientists at the PHD-level may have more advanced positions. 
 
+
 **Figure 2. Skill Request Counts**
 ![Figure 2: Skill Request Counts](most_requested_skills.png)
 
+
 #### Highest Valued Data Science Skill 
+
 
 **Figure 3. Top Skill Salary Counts**
 ![Figure 3: Top Skill Salary Counts](TopSkills.png)
+
 
 From these top skills, we can see that Python, R and statistics are the skills requested with the highest average salary associated with their job postings. The lowest value for salary is for job postings that do not contain any of the top skills, as well as the lowest IQR range values.
 
 The following figure displays the IQR breakdown of average salaries and top skills from the rankings above. 
 
+
 **Figure 3. Top Skill Salary Counts**
 ![Figure 3: Top Skill Salary Counts](TopSkills.png)
 
+
 The breakdown of the languages for salary are below. As far as Python, R, and SQL salaries go, the measured salaries for Python are bunched up at higher salaries than R and SQL. 
+
 
 **Figure 4. Programming Language Skill Salary Counts**
 ![Figure 3: Programming Language Skill Salary Counts](PythonSQLR.png)
+
 
 ## Conclusion
 
