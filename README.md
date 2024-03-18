@@ -23,6 +23,8 @@ For normalization, job titles, companies, and onsite/remote felt like the most o
 
 The Entity-Relationship (ER) diagram below shows the normalized tables we created in SQL before manipulating our data in R, including descriptions of the data they hold, and how they are connected. Foreign keys for job title id (title), company id (cid), and remote/onsite id (orid) are indicated by red diamonds. 
 
+The database schema and data import was done through our ddl.sql file contents through MySQL Workbench.
+
 ![Figure 1: Entity-Relationship (ER) diagram](ER.png)
 
 ### Required Packages
