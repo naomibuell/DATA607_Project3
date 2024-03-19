@@ -57,10 +57,6 @@ All cleaning and tidying was completed in R. Below descripes steps taken to prep
 -   Job title is standardized by using consistent capitalization and removing special characters.
 -   The final job titles are stored in the `title_clean` column.
 
-### Company
-
--   Verified no revisions needed.
-
 ### Description
 
 -   `description` text is parsed through, ignoring case, for skills from existing data science skills keywords list sourced from various places on the web. Each keyword was checked for with surrounding word boundaries (\\b) to prevent small character count keywords, such as "R", from being detected unless they were explicitly used. Skills were extracted into new normalized table `jobs.skills`, with one column for skill name and one column mapping skill to unique job listing ID.
